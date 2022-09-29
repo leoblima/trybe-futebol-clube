@@ -13,24 +13,24 @@ UserModel.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   username: {
     type: new DataTypes.STRING(255),
-    allowNull: false
+    allowNull: false,
   },
   role: {
     type: new DataTypes.STRING(255),
-    allowNull: false
+    allowNull: false,
   },
   email: {
     type: new DataTypes.STRING(255),
-    allowNull: false
+    allowNull: false,
   },
   password: {
     type: new DataTypes.STRING(255),
-    allowNull: false
-  }
+    allowNull: false,
+  },
 }, {
   sequelize: db,
   modelName: 'UserModel',
