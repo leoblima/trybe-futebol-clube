@@ -3,6 +3,10 @@ import UserService from '../service/User.service';
 import { comparePassword } from '../auth/hash';
 
 class LoginValidation {
+  static isNotAllFilled(email: string, password: string) {
+    return !email || !password;
+  }
+
   static async getUserByEmail(email:string) {
     const user = await UserService.findOneByEmail(email);
     return user;
@@ -29,10 +33,13 @@ class LoginValidation {
   static async checkLogin(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
+      if (LoginValidation.isNotAllFilled(email, password)) {
+        return res.status(400).json({ message: 'All fields must be filled' });
+      }
       const validEmail = await LoginValidation.isEmailValid(email);
       const validPassword = await LoginValidation.isPasswordValid(email, password);
       if (!validEmail || !validPassword) {
-        return res.status(403).json({ message: 'Email or password invalid!' });
+        return res.status(400).json({ message: 'Incorrect email or password' });
       }
       next();
     } catch (error) {
