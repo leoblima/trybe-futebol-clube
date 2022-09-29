@@ -7,8 +7,9 @@ const jwtConfig: SignOptions = {
   algorithm: 'HS256',
 };
 
-function generateToken(email: string) {
-  return sign({ data: { email } }, secret, jwtConfig);
+function generateToken(email: string): string {
+  const token = sign({ data: { email } }, secret, jwtConfig);
+  return token;
 }
 
 export default generateToken;
