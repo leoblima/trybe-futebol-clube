@@ -4,6 +4,7 @@ import Login from './controllers/Login.controller';
 import LoginValidation from './middlewares/Login.middleware';
 import LoginValidate from './middlewares/LoginValidate.middleware';
 import TeamsController from './controllers/Team.controller';
+import MatchController from './controllers/Match.controller';
 
 class App {
   public app: express.Express;
@@ -23,6 +24,8 @@ class App {
     this.app.get('/teams', TeamsController.findAll);
 
     this.app.get('/teams/:id', TeamsController.findByPk);
+
+    this.app.get('/matches', MatchController.findAll);
   }
 
   private config():void {
