@@ -15,45 +15,55 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
+interface Team {
+  id: number,
+  teamName: string,
+}
+
 describe('Testa rota GET /teams', () => {
   let chaiHttpResponse: Response;
 
-  before(async () => {
-    sinon
-      .stub(TeamsModel, "findAll")
-      .resolves();
-  });
-
-  after(()=>{
-    (TeamsModel.findAll as sinon.SinonStub).restore();
-  })
-
-  it('se quando requisitado retorna os valores corretos', async () => {
+  it('se quando requisitado retorna todos os times como o esperado', async () => {
     chaiHttpResponse = await chai
         .request(app)
         .get('/teams');
 
     chai.expect(chaiHttpResponse.status).to.be.equal(200);
-    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('teamName');
-    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('id');
-    chai.expect(chaiHttpResponse.body).to.be.equal(teamsMock);
-
-
-  });
-
-  it('se o token é retornado', async () => {
-  });
-
-  it('se com o email não está preenchido, é retornada a mensagem: "All fields must be filled"', async () => {
-  });
-
-  it('se com o password não está preeenchido, é retornada a mensagem: "All fields must be filled"', async () => {
-  });
-
-  it('se com o email não está preenchido, é retornada a mensagem: "Incorrect email or password"', async () => {
-  });
-
-  it('se com o password inválido, é retornada a mensagem: "Incorrect email or password"', async () => {
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamName');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('id');
+    chai.expect(chaiHttpResponse.body[0].id).to.equal(1);
+    chai.expect(chaiHttpResponse.body[0].teamName).to.be.equal('Avaí/Kindermann')
+    chaiHttpResponse.body.forEach((team: Team, index: number) => {
+      chai.expect(team.id).to.equal(teamsMock[index].id);
+      chai.expect(team.teamName).to.equal(teamsMock[index].teamName);
+    });
   });
 });
 
+describe('Testa rota GET /teams/:id', () => {
+  let chaiHttpResponse: Response;
+
+  it('se quando requisitado com o id = 1 retorna o time correto', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .get('/teams/1');
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(200);
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('teamName');
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('id');
+    chai.expect(chaiHttpResponse.body.id).to.equal(1);
+    chai.expect(chaiHttpResponse.body.teamName).to.be.equal('Avaí/Kindermann')
+  });
+
+  it('se quando requisitado com o id = 8 retorna o time correto', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .get('/teams/8');
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(200);
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('teamName');
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('id');
+    chai.expect(chaiHttpResponse.body.id).to.equal(8);
+    chai.expect(chaiHttpResponse.body.teamName).to.be.equal('Grêmio')
+  });
+});

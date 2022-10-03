@@ -3,6 +3,7 @@ import Login from './controllers/Login.controller';
 // import UserController from './controllers/User.controller';
 import LoginValidation from './middlewares/Login.middleware';
 import LoginValidate from './middlewares/LoginValidate.middleware';
+import TeamsController from './controllers/Team.controller';
 
 class App {
   public app: express.Express;
@@ -18,6 +19,10 @@ class App {
     this.app.post('/login', LoginValidation.checkLogin, Login.login);
 
     this.app.get('/login/validate', LoginValidate.verifyJWTMiddleware, Login.loginValidate);
+
+    this.app.get('/teams', TeamsController.findAll);
+
+    this.app.get('/teams/:id', TeamsController.findByPk);
   }
 
   private config():void {
