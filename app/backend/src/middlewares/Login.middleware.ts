@@ -39,7 +39,7 @@ class LoginValidation {
       const validEmail = await LoginValidation.isEmailValid(email);
       const validPassword = await LoginValidation.isPasswordValid(email, password);
       if (!validEmail || !validPassword) {
-        return res.status(400).json({ message: 'Incorrect email or password' });
+        return res.status(401).json({ message: 'Incorrect email or password' });
       }
       next();
     } catch (error) {
