@@ -1,5 +1,6 @@
 import TeamsModel from '../database/models/Team';
 import MatchModel from '../database/models/Match';
+import INewMatch from './interfaces';
 import TeamsService from './Team.service';
 
 class MatchService {
@@ -41,6 +42,20 @@ class MatchService {
     ] });
 
     return { code: 200, data: allMatches };
+  }
+
+  static async create(newInput: INewMatch) {
+    const newMatch = await MatchModel.create(newInput);
+    return { code: 201, data: newMatch };
+  }
+
+  static async finishMatch(id: number) {
+    const [updatedRows] = await MatchModel.update(
+      { inProgress: false },
+      { where: { id } },
+    );
+    if (updatedRows === 1) return { code: 200, message: 'Finished' };
+    return { code: 403, message: 'Invalid Id' };
   }
 }
 

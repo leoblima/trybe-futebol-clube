@@ -26,6 +26,10 @@ class App {
     this.app.get('/teams/:id', TeamsController.findByPk);
 
     this.app.get('/matches', MatchController.findAll);
+
+    this.app.post('/matches', LoginValidate.verifyJWTMiddleware, MatchController.create);
+
+    this.app.patch('/matches/:id/finish', MatchController.finishMatch);
   }
 
   private config():void {
