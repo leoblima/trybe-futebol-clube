@@ -64,6 +64,16 @@ class MatchService {
     if (match) return { code: 200, data: match };
     return { code: 404, data: match };
   }
+
+  static async updateMatch(id: number, homeGoals: number, awayGoals: number) {
+    const [updatedRows] = await MatchModel.update(
+      { homeTeamGoals: homeGoals,
+        awayTeamGoals: awayGoals },
+      { where: { id } },
+    );
+    if (updatedRows === 1) return { code: 200, message: 'Updated' };
+    return { code: 403, message: 'Invalid Id' };
+  }
 }
 
 export default MatchService;

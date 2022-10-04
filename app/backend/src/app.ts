@@ -36,6 +36,8 @@ class App {
     );
 
     this.app.patch('/matches/:id/finish', MatchController.finishMatch);
+
+    this.app.patch('/matches/:id', MatchValidation.checkMatchProgress, MatchController.updateMatch);
   }
 
   private config():void {
