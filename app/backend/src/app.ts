@@ -5,6 +5,7 @@ import LoginValidation from './middlewares/Login.middleware';
 import LoginValidate from './middlewares/LoginValidate.middleware';
 import TeamsController from './controllers/Team.controller';
 import MatchController from './controllers/Match.controller';
+import MatchValidation from './middlewares/Match.middleware';
 
 class App {
   public app: express.Express;
@@ -27,7 +28,12 @@ class App {
 
     this.app.get('/matches', MatchController.findAll);
 
-    this.app.post('/matches', LoginValidate.verifyJWTMiddleware, MatchController.create);
+    this.app.post(
+      '/matches',
+      LoginValidate.verifyJWTMiddleware,
+      MatchValidation.checkMatch,
+      MatchController.create,
+    );
 
     this.app.patch('/matches/:id/finish', MatchController.finishMatch);
   }

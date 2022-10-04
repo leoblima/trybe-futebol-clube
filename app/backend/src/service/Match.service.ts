@@ -57,6 +57,13 @@ class MatchService {
     if (updatedRows === 1) return { code: 200, message: 'Finished' };
     return { code: 403, message: 'Invalid Id' };
   }
+
+  static async findByPk(id: number) {
+    const match = await MatchModel.findByPk(id);
+
+    if (match) return { code: 200, data: match };
+    return { code: 404, data: match };
+  }
 }
 
 export default MatchService;

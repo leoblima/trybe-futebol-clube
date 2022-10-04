@@ -26,7 +26,7 @@ class LoginValidate {
         }
       }
     } catch (error) {
-      return res.status(403).json({ message: 'Invalid token!' });
+      return res.status(401).json({ message: 'Token must be a valid token' });
     }
   }
 }
