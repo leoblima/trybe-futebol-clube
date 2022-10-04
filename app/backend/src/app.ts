@@ -6,6 +6,7 @@ import LoginValidate from './middlewares/LoginValidate.middleware';
 import TeamsController from './controllers/Team.controller';
 import MatchController from './controllers/Match.controller';
 import MatchValidation from './middlewares/Match.middleware';
+import LeaderboardController from './controllers/Leaderboard.controller';
 
 class App {
   public app: express.Express;
@@ -38,6 +39,8 @@ class App {
     this.app.patch('/matches/:id/finish', MatchController.finishMatch);
 
     this.app.patch('/matches/:id', MatchValidation.checkMatchProgress, MatchController.updateMatch);
+
+    this.app.get('/leaderboard', LeaderboardController.getLeaderboard);
   }
 
   private config():void {
