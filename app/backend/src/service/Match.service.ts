@@ -3,31 +3,30 @@ import MatchModel from '../database/models/Match';
 import TeamsService from './Team.service';
 
 class MatchService {
+  static getQueryValue(query: string):boolean {
+    if (query === 'true') return true;
+    return false;
+  }
+
+  static getInProgress(data: MatchModel[], query: boolean) {
+    const inProgressMatches = data.filter((match) => match.inProgress === query);
+    return inProgressMatches;
+  }
+
   static async getTeamName(id: number) {
     const team = await TeamsService.findByPk(id);
     if (typeof team.data !== 'string') return { teamName: team.data.teamName };
   }
 
-  static async findAll() {
-    const matchBasis = await MatchModel.findAll();
-
-    const allMatches = await Promise.all(matchBasis.map(async (match) => {
-      const { id, homeTeam, awayTeam, homeTeamGoals, awayTeamGoals, inProgress } = match;
-      const teamHome = await MatchService.getTeamName(match.homeTeam);
-      const teamAway = await MatchService.getTeamName(match.awayTeam);
-      return { id,
-        homeTeam,
-        awayTeam,
-        homeTeamGoals,
-        awayTeamGoals,
-        inProgress,
-        teamHome,
-        teamAway };
-    }));
-    return { code: 200, data: allMatches };
+  static async findAllInProgress(query: string) {
+    console.log('service');
+    const { data } = await MatchService.findAll();
+    const queryValue = MatchService.getQueryValue(query);
+    const queryMatches = MatchService.getInProgress(data, queryValue);
+    return { code: 200, data: queryMatches };
   }
 
-  static async findAllDirect() {
+  static async findAll() {
     const allMatches = await MatchModel.findAll({ include: [
       {
         model: TeamsModel,
