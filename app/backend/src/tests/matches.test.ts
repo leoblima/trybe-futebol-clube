@@ -9,24 +9,25 @@ import matchesMock from './mocks/matchMocks';
 
 
 import { Response } from 'superagent';
+import MatchModel from '../database/models/Match';
 
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-interface TeamMatch {
+interface ITeamMatch {
   teamName: string
 }
 
-interface Match {
+interface IMatch {
  id: number,
  homeTeam: number,
  homeTeamGoals: number,
  awayTeam: number,
  awayTeamsGoals: number,
  inProgress: boolean,
- teamHome: TeamMatch,
- teamAway: TeamMatch,
+ teamHome: ITeamMatch,
+ teamAway: ITeamMatch,
 }
 
 describe('Testa rota GET /matches', () => {
@@ -38,6 +39,7 @@ describe('Testa rota GET /matches', () => {
         .get('/matches');
 
     chai.expect(chaiHttpResponse.status).to.be.equal(200);
+
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('id');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeam');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeamGoals');
@@ -46,6 +48,7 @@ describe('Testa rota GET /matches', () => {
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('inProgress');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamHome');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamAway');
+
     chai.expect(chaiHttpResponse.body[0].id).to.equal(1);
     chai.expect(chaiHttpResponse.body[0].homeTeam).to.equal(16);
     chai.expect(chaiHttpResponse.body[0].homeTeamGoals).to.equal(1);
@@ -74,13 +77,113 @@ describe('Testa rota GET /matches?inProgress', () => {
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('inProgress');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamHome');
     chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamAway');
-    chai.expect(chaiHttpResponse.body[0].id).to.equal(1);
+
+    chaiHttpResponse.body.forEach((match: IMatch) => {
+      chai.expect(match.inProgress).to.equal(true);
+    })
+  });
+  it('se quando inProgress é falso retorna todas as partidas terminadas como o esperado', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .get('/matches?inProgress=false');
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(200);
+
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('id');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeam');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeamGoals');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('awayTeam');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('awayTeamGoals');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('inProgress');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamHome');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('teamAway');
+
+    chaiHttpResponse.body.forEach((match: IMatch) => {
+      chai.expect(match.inProgress).to.equal(false);
+    })
+  });
+});
+describe('Testa rota POST /matches', () => {
+  let chaiHttpResponse: Response;
+
+  it('se quando enviada salva a partida como esperado', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send({
+          homeTeam: 16,
+          awayTeam: 8, 
+          homeTeamGoals: 2,
+          awayTeamGoals: 2,
+          inProgress: true
+        })
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(201);
+
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('id');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeam');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('homeTeamGoals');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('awayTeam');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('awayTeamGoals');
+    chai.expect(chaiHttpResponse.body[0]).to.haveOwnProperty('inProgress');
+
     chai.expect(chaiHttpResponse.body[0].homeTeam).to.equal(16);
-    chai.expect(chaiHttpResponse.body[0].homeTeamGoals).to.equal(1);
+    chai.expect(chaiHttpResponse.body[0].homeTeamGoals).to.equal(2);
     chai.expect(chaiHttpResponse.body[0].awayTeam).to.equal(8);
-    chai.expect(chaiHttpResponse.body[0].awayTeamGoals).to.equal(1);
-    chai.expect(chaiHttpResponse.body[0].inProgress).to.equal(false);
-    chai.expect(chaiHttpResponse.body[0].teamHome.teamName).to.equal('São Paulo');
-    chai.expect(chaiHttpResponse.body[0].teamAway.teamName).to.equal('Grêmio');
+    chai.expect(chaiHttpResponse.body[0].awayTeamGoals).to.equal(2);
+    chai.expect(chaiHttpResponse.body[0].inProgress).to.equal(true);
+  });
+  it('se não é possível incluir uma partida com dois times iguais', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send({
+          homeTeam: 16,
+          awayTeam: 16, 
+          homeTeamGoals: 2,
+          awayTeamGoals: 2,
+          inProgress: true
+        })
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(401);
+
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('message');
+    chai.expect(chaiHttpResponse.body.message).to.equal('It is not possible to create a match with two equal teams');
+  });
+  it('se não é possível incluir uma partida com um time inexistente', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send({
+          homeTeam: 9999,
+          awayTeam: 16, 
+          homeTeamGoals: 2,
+          awayTeamGoals: 2,
+          inProgress: true
+        })
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(401);
+
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('message');
+    chai.expect(chaiHttpResponse.body.message).to.equal('There is no team with such id!');
+  });
+});
+
+describe('Testa rota PATCH /matches/:id/finish', () => {
+  let chaiHttpResponse: Response;
+
+  it('se quando enviada finaliza a partida como o esperado', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41/finish')
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(200);
+
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('message');
+    chai.expect(chaiHttpResponse.body.message).to.equal('Finished');
+
+    const data = await MatchModel.findByPk(41);
+    chai.expect(data).to.not.be('');
+    chai.expect(data?.inProgress).to.equal(false);
   });
 });

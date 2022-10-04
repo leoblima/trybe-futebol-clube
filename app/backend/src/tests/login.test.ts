@@ -86,7 +86,7 @@ describe('Testa rota POST /login', () => {
       "email": "not_valid",
       "password": "secret_admin"
   })
-    chai.expect(chaiHttpResponse.status).to.equal(400);
+    chai.expect(chaiHttpResponse.status).to.equal(401);
     chai.expect(chaiHttpResponse.body.message).to.equal('Incorrect email or password');
   });
 
@@ -98,7 +98,7 @@ describe('Testa rota POST /login', () => {
       "email": "admin@admin.com",
       "password": "not_valid"
   })
-    chai.expect(chaiHttpResponse.status).to.equal(400);
+    chai.expect(chaiHttpResponse.status).to.equal(401);
     chai.expect(chaiHttpResponse.body.message).to.equal('Incorrect email or password');
   });
 });
