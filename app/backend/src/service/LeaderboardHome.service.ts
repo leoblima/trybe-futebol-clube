@@ -99,7 +99,17 @@ class LeaderboardHome {
     const allTeams = await LeaderboardHome.getAllTeams();
     const leaderboard = await Promise.all(allTeams.data
       .map(async (team: TeamsModel) => LeaderboardHome.getTeamStatus(team)));
-    leaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
+    leaderboard.sort((a, b) => {
+      if (b.totalPoints > a.totalPoints) return 1;
+      if (b.totalPoints < a.totalPoints) return -1;
+      if (b.totalVictories > a.totalVictories) return 1;
+      if (b.totalVictories < a.totalVictories) return -1;
+      if (b.goalsBalance > a.goalsBalance) return 1;
+      if (b.goalsBalance < a.goalsBalance) return -1;
+      if (b.goalsFavor > a.goalsFavor) return 1;
+      if (b.goalsFavor < a.goalsFavor) return -1;
+      return 0;
+    });
     return { code: 200, data: leaderboard };
   }
 }
