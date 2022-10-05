@@ -20,7 +20,6 @@ class MatchService {
   }
 
   static async findAllInProgress(query: string) {
-    console.log('service');
     const { data } = await MatchService.findAll();
     const queryValue = MatchService.getQueryValue(query);
     const queryMatches = MatchService.getInProgress(data, queryValue);

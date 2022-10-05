@@ -14,7 +14,7 @@ class LoginValidate {
     }
   }
 
-  static async verifyJWTMiddleware(req: Request, res: Response, next: NextFunction) {
+  static async checkJWT(req: Request, res: Response, next: NextFunction) {
     try {
       const token = req.header('Authorization');
 

@@ -2,9 +2,9 @@ import * as express from 'express';
 import Login from './controllers/Login.controller';
 // import UserController from './controllers/User.controller';
 import LoginValidation from './middlewares/Login.middleware';
-import LoginValidate from './middlewares/LoginValidate.middleware';
+import validate from './middlewares/LoginValidate.middleware';
 import TeamsController from './controllers/Team.controller';
-import MatchController from './controllers/Match.controller';
+import MatchControll from './controllers/Match.controller';
 import MatchValidation from './middlewares/Match.middleware';
 import LeaderboardController from './controllers/Leaderboard.controller';
 
@@ -21,24 +21,22 @@ class App {
 
     this.app.post('/login', LoginValidation.checkLogin, Login.login);
 
-    this.app.get('/login/validate', LoginValidate.verifyJWTMiddleware, Login.loginValidate);
+    this.app.get('/login/validate', validate.checkJWT, Login.loginValidate);
 
     this.app.get('/teams', TeamsController.findAll);
 
     this.app.get('/teams/:id', TeamsController.findByPk);
 
-    this.app.get('/matches', MatchController.findAll);
+    this.app.get('/matches', MatchControll.findAll);
 
-    this.app.post(
-      '/matches',
-      LoginValidate.verifyJWTMiddleware,
-      MatchValidation.checkMatch,
-      MatchController.create,
-    );
+    this.app.post('/matches', validate.checkJWT, MatchValidation.checkMatch, MatchControll.create);
+    this.app.patch('/matches/:id/finish', MatchControll.finishMatch);
 
-    this.app.patch('/matches/:id/finish', MatchController.finishMatch);
+    this.app.patch('/matches/:id', MatchValidation.checkMatchProgress, MatchControll.updateMatch);
 
-    this.app.patch('/matches/:id', MatchValidation.checkMatchProgress, MatchController.updateMatch);
+    this.app.get('/leaderboard/home', LeaderboardController.getLeadaerboardHome);
+
+    this.app.get('/leaderboard/away', LeaderboardController.getLeadaerboardAway);
 
     this.app.get('/leaderboard', LeaderboardController.getLeaderboard);
   }

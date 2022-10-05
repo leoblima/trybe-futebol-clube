@@ -15,6 +15,8 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
+const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIn0sImlhdCI6MTY2NDkyODA0NSwiZXhwIjoxNjY1NTMyODQ1fQ.rYLpRm135LSclOxs0WKrVL1N2077-_dWJCffItMPGl8`;
+
 interface ITeamMatch {
   teamName: string
 }
@@ -110,6 +112,7 @@ describe('Testa rota POST /matches', () => {
     chaiHttpResponse = await chai
         .request(app)
         .post('/matches')
+        .auth(token, { type: 'bearer' })
         .send({
           homeTeam: 16,
           awayTeam: 8, 
@@ -137,6 +140,7 @@ describe('Testa rota POST /matches', () => {
     chaiHttpResponse = await chai
         .request(app)
         .post('/matches')
+        .auth(token, { type: 'bearer' })
         .send({
           homeTeam: 16,
           awayTeam: 16, 
@@ -154,6 +158,7 @@ describe('Testa rota POST /matches', () => {
     chaiHttpResponse = await chai
         .request(app)
         .post('/matches')
+        .auth(token, { type: 'bearer' })
         .send({
           homeTeam: 9999,
           awayTeam: 16, 
@@ -166,6 +171,24 @@ describe('Testa rota POST /matches', () => {
 
     chai.expect(chaiHttpResponse.body).to.haveOwnProperty('message');
     chai.expect(chaiHttpResponse.body.message).to.equal('There is no team with such id!');
+  });
+  it('se não é possível incluir uma partida com token inválido', async () => {
+    chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .auth('', { type: 'bearer' })
+        .send({
+          homeTeam: 8,
+          awayTeam: 16, 
+          homeTeamGoals: 2,
+          awayTeamGoals: 2,
+          inProgress: true
+        })
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(401);
+
+    chai.expect(chaiHttpResponse.body).to.haveOwnProperty('message');
+    chai.expect(chaiHttpResponse.body.message).to.equal('Token must be a valid token');
   });
 });
 
@@ -183,7 +206,31 @@ describe('Testa rota PATCH /matches/:id/finish', () => {
     chai.expect(chaiHttpResponse.body.message).to.equal('Finished');
 
     const data = await MatchModel.findByPk(41);
-    chai.expect(data).to.not.be('');
+    chai.expect(data).to.not.equal('');
     chai.expect(data?.inProgress).to.equal(false);
+  });
+});
+
+describe('Testa rota PATCH /matches/:id', () => {
+  let chaiHttpResponse: Response;
+
+  it('se atualiza a partida como o esperado', async () => {
+    const before = await MatchModel.findByPk(41);
+    chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/42')
+        .send({
+          homeTeamGoals: 3,
+          awayTeamGoals: 1
+        })
+
+    chai.expect(chaiHttpResponse.status).to.be.equal(200);
+    const data = await MatchModel.findByPk(42);
+
+    chai.expect(data).to.not.equal('');
+    chai.expect(data?.homeTeamGoals).to.equal(3);
+    chai.expect(data?.awayTeamGoals).to.equal(1);
+
+    chai.expect(data).to.not.equal(before);
   });
 });
